@@ -70,5 +70,5 @@ result.plot_fidelity()
 **Day 6-7**
 
 - Add proper documentation and very all tests and examples. Update README file and make sure requirements are up to date.
-- If time allows, optimize the computations and speed things up. (Use: scipy.sparse -> expm_multiply and spsolve, numpy, optionally qutip, jit from numba or jax, lru_cache, lprun for diagnostics, ...)
+- If time allows, optimize the computations and speed things up. (Use: scipy.sparse -> expm_multiply and spsolve, numpy, optionally qutip, jit from numba (njit(parallel=True)) or jax, lru_cache, lprun for diagnostics, ...)
 
