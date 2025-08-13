@@ -1,0 +1,116 @@
+{
+  "ion": "171Yb+",
+  "levels": {
+    "S1/2": {
+      "hyperfine_qubit": {
+        "splitting_GHz": 12.642812,
+        "source": "NIST/hyperfine"
+      }
+    },
+    "P1/2": {
+      "wavelength_nm": 369.53,
+      "lifetime_ns": 8.12,
+      "decay_rate_s": 1.2315e8,
+      "linewidth_MHz": 19.6,
+      "branching": {
+        "to_S1/2": {
+          "fraction": 0.99499,
+          "rate_s": 1.2254e8
+        },
+        "to_D3/2": {
+          "fraction": 0.00501,
+          "rate_s": 6.17e5
+        }
+      },
+      "source": "Hayes2009 + Porsev"
+    },
+    "P3/2": {
+      "wavelength_nm": 329.0,
+      "lifetime_ns": 6.15,
+      "decay_rate_s": 1.626e8,
+      "branching": {
+        "to_D5/2": {
+          "fraction": 0.0108,
+          "rate_s": 1.756e6
+        },
+        "to_D3/2": {
+          "fraction": 0.0017,
+          "rate_s": 2.76e5
+        },
+        "to_S1/2": {
+          "fraction": 0.9875,
+          "rate_s": 1.605e8
+        }
+      },
+      "source": "Feldker2018"
+    },
+    "D3/2": {
+      "lifetime_ms": 52.7,
+      "decay_rate_s": 18.98,
+      "source": "Yu2000"
+    },
+    "D5/2": {
+      "lifetime_ms": 7.0,
+      "decay_rate_s": 142.9,
+      "source": "Yu2000"
+    },
+    "F7/2": {
+      "lifetime_years": 1.58,
+      "decay_rate_s": 2.0e-8,
+      "source": "Huntemann2021"
+    }
+  },
+  "repumps": {
+    "D3/2 → [3/2]1/2": {
+      "wavelength_nm": 935.2,
+      "description": "Repump from D3/2 back to S1/2 via 3[3/2]1/2",
+      "source": "SussexGroup"
+    },
+    "F7/2 → 1D[5/2]5/2": {
+      "wavelength_nm": 638.6,
+      "description": "Common repump for F7/2 shelving",
+      "source": "SussexGroup"
+    },
+    "F7/2 → 1D[3/2]3/2": {
+      "wavelength_nm": 760.0,
+      "description": "Alternative repump from F7/2",
+      "source": "Huntemann2021"
+    }
+  },
+  "clock_transitions": {
+    "S1/2 → D5/2 (E2)": {
+      "wavelength_nm": 411.0,
+      "description": "Electric-quadrupole (E2), shelving/readout",
+      "source": "HuntemannReview"
+    },
+    "S1/2 → D3/2 (E2)": {
+      "wavelength_nm": 436.0,
+      "description": "Electric-quadrupole (E2) transition",
+      "source": "HuntemannReview"
+    },
+    "S1/2 → F7/2 (E3)": {
+      "wavelength_nm": 467.0,
+      "description": "Electric-octupole (E3) clock transition",
+      "source": "HuntemannReview"
+    }
+  },
+  "photoionization": {
+    "step1_wavelength_nm": 399.0,
+    "step2_wavelength_nm": 369.5,
+    "description": "Two-step photo‐ionization via neutral Yb",
+    "source": "StandardLab"
+  },
+  "trap_and_laser_parameters": {
+    "trap_frequency_motional_MHz": 1.0,
+    "lamb_dicke_parameter": 0.05,
+    "raman_detuning_GHz": 100.0,
+    "raman_rabi_frequency_kHz": 50.0,
+    "microwave_rabi_frequency_kHz": 10.0,
+    "laser_linewidth_Hz": 100.0,
+    "motional_heating_rate_quanta_per_ms": 10.0,
+    "branching_for_raman_scattering": {
+      "estimated_scattering_rate_s": 10.0
+    },
+    "source": "TypicalTrapParams"
+  }
+}

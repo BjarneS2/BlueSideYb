@@ -1,0 +1,18 @@
+[project]
+name = "bluesideyb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "h5py>=3.14.0",
+    "ipython>=9.4.0",
+    "ipywidgets>=8.1.7",
+    "jax>=0.7.0",
+    "matplotlib>=3.10.5",
+    "numba>=0.61.2",
+    "numpy>=2.2.6",
+    "qutip>=5.2.0",
+    "scipy>=1.16.1",
+    "tqdm>=4.67.1",
+]
