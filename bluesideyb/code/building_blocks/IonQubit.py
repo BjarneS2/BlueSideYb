@@ -1,21 +1,23 @@
-'''
-Creates the quantum system of 171Yb+ ion. Defines the basis states. Creates a Quantum State in the quantum system to operate on
-Potentially later the decay operations and the laser drive operations.  
-'''
-
 # Imports
 import json
-import scipy
-import jax as jx    # could be used for jit
-import numba as nb  # use for jit, maybe parallelization
+# import scipy
+# import jax as jx    # could be used for jit
+# import numba as nb  # use for jit, maybe parallelization
 import numpy as np  # use for computation
 from pathlib import Path
 from scipy.sparse import csr_matrix, csr_array, kron, identity  # faster operation and optimization
 from scipy.sparse.linalg import expm_multiply
 import matplotlib.pyplot as plt  # to showcase the frequency and amplitude - maybe just the pulse so one can see it
 from typing import Union, Tuple, List, Any, Callable, Literal, Sequence
+import matplotlib as mpl
+mpl.rcParams['figure.autolayout'] = False
+mpl.rcParams['toolbar'] = 'none'  # optional, removes toolbar overhead
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # TODO: make @ into np.einsum for faster computation. Think about using numba as well for jit compilation
+# TODO: implement solving of master equation
+# TODO: save the state at each time step in the solving process
 
 class System:
     def __init__(self, dimension: int, path: Union[None, str, Path] = None):
@@ -29,6 +31,23 @@ class System:
             path = Path.cwd() / "constants.json"
         with open(path, 'r') as f:
             self.constants = json.load(f)
+        
+        # energies relative to |0>
+        self.E_0 = 0.0  # S1/2 F=0 reference
+        self.E_1 = self.constants["levels"]["S1/2_hyperfine"]["F1"]["energy_eV"]
+        self.E_P = self.constants["levels"]["P1/2"]["energy_eV"]
+        self.E_D = self.constants["levels"]["D3/2"]["energy_eV"]
+
+        # optional: for future extension maybe include more levels for clocks and storing.
+        # self.E_D5 = self.constants["levels"]["D5/2"]["energy_eV"] if "D5/2" in self.constants["levels"] else None
+        # self.E_F7 = self.constants["levels"]["F7/2"]["energy_eV"] if "F7/2" in self.constants["levels"] else None
+
+        # store lifetimes / decay rates
+        self.tau_P = self.constants["levels"]["P1/2"]["lifetime_ms"]      # ms
+        self.gamma_P = self.constants["levels"]["P1/2"]["decay_rate_Hz"]  # Hz
+
+        self.tau_D = self.constants["levels"]["D3/2"]["lifetime_ms"]      # ms
+        self.gamma_D = self.constants["levels"]["D3/2"]["decay_rate_Hz"]  # Hz
 
     def ket(self, i: int) -> csr_matrix:
         v = np.zeros((self.dim, 1), dtype=complex); v[i, 0] = 1.0
@@ -73,7 +92,6 @@ class System:
             L += kron(C, C.conjugate())
             L += -0.5 * kron(I, CdC.T) - 0.5 * kron(CdC, I)
         return L.tocsr()
-
 
 class IonQubit(System):
     """
@@ -148,12 +166,12 @@ class IonQubit(System):
         raise TypeError("state must be None, int, str, or csr_matrix. Please look at the documentation for more details.")
 
     # ---- Hamiltonians (CSR matrix) ----
-    def H_intrinsic(self, Delta: float, delta: float, eps_D: float = 0.0) -> csr_matrix:
+    def H_intrinsic(self) -> csr_matrix:
         """
         H0 = -Delta |P><P| + (delta/2) |1><1| + eps_D |D><D|
         Describes the IonQubit at rest. With the corresponding energies relative to |0> with energy E0=0eV
         """
-        H = (-Delta)*self.PP + (delta/2.0)*self.P1 + eps_D*self.PD
+        H = self.E_P * self.PP + self.E_1 * self.P1 + self.E_D * self.PD
         return H.tocsr()
 
     def H_raman(self, Omega1: complex, phi1: float,
@@ -237,11 +255,12 @@ class IonQubit(System):
         expectations = {}
         for name, psi in states.items():
             projector = (psi @ psi.getH()).tocsr()
-            expectations[name] = np.real(np.trace(self.state @ projector))
+            expectations[name] = np.real((self.state @ projector).diagonal().sum())  # np.real(np.trace(self.state @ projector)) --> not working with csr matrices
         return expectations
 
     def expectation(self, O: csr_matrix) -> complex:
-        return np.trace(self.state @ O)
+        return (self.state @ O).diagonal().sum()
+        # return np.trace(self.state @ O) <-- not compatible with csr matrices
 
     def projections(self) -> dict:
         """
@@ -268,41 +287,111 @@ class IonQubit(System):
         x = self.expectation(sigma_x).real
         y = self.expectation(sigma_y).real
         z = self.expectation(sigma_z).real
+        # TODO: Check that x**2+y**2+z**2 is smaller or equal to 1 e.g. the length of the bloch vector
         return np.array([x, y, z])
 
-    def plot_vector(self) -> None:
-        # To be implemented - maybe use qutip/qiskit/... for visualization
-        # Might do my own version in matplotlib though
-        pass
+    # To be implemented - maybe use qutip/qiskit/... for visualization
+    # Might do my own version in matplotlib though
 
-        
+    def plot_vector_matplotlib(self, show_arrow=True, figsize=(8, 8), background="#222831", sphere_color="#393e46", 
+                    point_color="#00adb5", arrow_color="#f8b400", label_color="#eeeeee", alpha=0.15):
+        """
+        Advanced 3D Bloch sphere visualization with state, axes, and key points.
+        """
+        # Bloch sphere setup
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111, projection='3d')
+        fig.patch.set_facecolor(background)
+        ax.set_facecolor(background)
+        ax.grid(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])  # type: ignore
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.set_box_aspect([1,1,1])
+
+        # Draw sphere
+        u, v = np.mgrid[0:2*np.pi:200j, 0:np.pi:100j]
+        x = np.cos(u)*np.sin(v)
+        y = np.sin(u)*np.sin(v)
+        z = np.cos(v)
+        ax.plot_surface(x, y, z, color=sphere_color, alpha=alpha, linewidth=0, zorder=0) # , shade=True)
+
+        # Draw axes
+        axis_len = 1.
+        ax.plot([-axis_len, axis_len], [0,0], [0,0], color="#aaaaaa", lw=1.5, zorder=1)
+        ax.plot([0,0], [-axis_len, axis_len], [0,0], color="#aaaaaa", lw=1.5, zorder=1)
+        ax.plot([0,0], [0,0], [-axis_len, axis_len], color="#aaaaaa", lw=1.5, zorder=1)
+
+        # Key points on sphere
+        key_states = {
+            '|0⟩': np.array([0, 0, 1]),
+            '|1⟩': np.array([0, 0, -1]),
+            '|+⟩': np.array([1, 0, 0]),
+            '|-⟩': np.array([-1, 0, 0]),
+            '|i⟩': np.array([0, 1, 0]),
+            '|-i⟩': np.array([0, -1, 0])
+        }
+        key_colors = {
+            '|0⟩': "#00adb5",
+            '|1⟩': "#f8b400",
+            '|+⟩': "#ff6363",
+            '|-⟩': "#a66cff",
+            '|i⟩': "#43e97b",
+            '|-i⟩': "#f6416c"
+        }
+        for label, vec in key_states.items():
+            ax.scatter(*vec, color=key_colors[label], s=80, edgecolor="#222831", zorder=3)
+            ax.text(*(1.15*vec), label, color=label_color, fontsize=14, weight='bold', ha='center', va='center', zorder=4) # type: ignore
+
+        # Draw latitude and longitude lines for aesthetics
+        for theta in np.linspace(0, np.pi, 7)[1:-1]:
+            ax.plot(np.cos(u)*np.sin(theta), np.sin(u)*np.sin(theta), np.full_like(u, np.cos(theta)),
+                    color="#444", lw=0.5, alpha=0.7, zorder=0)
+        for phi in np.linspace(0, 2*np.pi, 13):
+            ax.plot(np.cos(phi)*np.sin(v), np.sin(phi)*np.sin(v), np.cos(v),
+                    color="#444", lw=0.5, alpha=0.7, zorder=0)
+
+        # Plot Bloch vector (state)
+        bloch = self.bloch_vector()
+        norm = np.linalg.norm(bloch)
+        if norm > 1:  # Clamp to sphere
+            bloch = bloch / norm
+            norm = 1
+        ax.scatter(*bloch, color=point_color, s=120, edgecolor="#eeeeee", zorder=5)
+        if show_arrow:
+            ax.quiver(0, 0, 0, *bloch, color=arrow_color, lw=3, arrow_length_ratio=0.18, zorder=6, alpha=0.95)
+
+        # Add subtle shadow for the state point
+        # ax.scatter(bloch[0], bloch[1], -1.01, color=point_color, s=60, alpha=0.2, zorder=2)
+
+        # Remove axes panes
+        ax.xaxis.pane.set_edgecolor(background)  # type: ignore
+        ax.yaxis.pane.set_edgecolor(background)  # type: ignore
+        ax.zaxis.pane.set_edgecolor(background)  # type: ignore
+        ax.xaxis.pane.set_facecolor(background)  # type: ignore
+        ax.yaxis.pane.set_facecolor(background)  # type: ignore
+        ax.zaxis.pane.set_facecolor(background)  # type: ignore
+        ax.xaxis.line.set_color((0,0,0,0))       # type: ignore
+        ax.yaxis.line.set_color((0,0,0,0))       # type: ignore
+        ax.zaxis.line.set_color((0,0,0,0))       # type: ignore
+
+        # Set limits and view
+        ax.set_xlim([-1.2, 1.2])
+        ax.set_ylim([-1.2, 1.2])
+        ax.set_zlim([-1.2, 1.2])
+        ax.view_init(elev=25, azim=45)
+
+        # Title and annotation
+        ax.set_title("Bloch Sphere Representation", color=label_color, fontsize=18, pad=20, weight='bold')
+        ax.text2D(0.05, 0.95, f"State: [{bloch[0]:.2f}, {bloch[1]:.2f}, {bloch[2]:.2f}]", 
+                    transform=ax.transAxes, color=label_color, fontsize=12, alpha=0.8)
+
+        # plt.tight_layout()
+        plt.show()
+
     
 
 
 
-class LaserDrive:
-    """
-    Represents a Laser Drive in the quantum system 
-    """
-    def __init__(self, laser_frequency: Union[None, float] = None, amplitude: Union[None, float] = None, 
-                 duration: Union[None, float] = None, pulse_shape: Literal['Gaussian', 'Square', 'Steady'] = "Gaussian",
-                 phase: Union[None, float] = None) -> None:
-        """
-        Creates a Laser Drive Pulse or continuous wave. Can be used for operations like pumping and qubit rotations.
-
-        Parameters:
-        pulse_shape: Shapes the laser pulse under a Gaussian, Square envelope or just a "steady pulse" meaning infinite length.
-        
-        Return:
-        None
-        """
-        
-        self.laser_frequency = laser_frequency  # Frequency of the laser
-        self.amplitude = amplitude              # Amplitude of the laser
-        self.duration = duration                # Duration of the laser pulse (use np.inf for continuous)
-        self.pulse_shape = pulse_shape          # Shape of the Laser pulse (Gaussian, Square, etc.)
-        self.phase = None                       # Phase of the laser pulse
-        self.pulse = None                       # The actual pulse data (time_stamp, value) <-- First set this to None needs to be generated 
-    
-# TODO: Get the basis states from the IonQubit and then create the operators so that one can apply rotations with the 
-#       Hamiltonians between some states. Use sparse matrices for this. 

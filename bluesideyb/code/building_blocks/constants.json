@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "notes": "All numeric values are precomputed. Runtime units: frequency=Hz, time=ms (lifetimes), energy=eV. Use hbar_sim=1 for simulation (internal convention).",
+    "hbar_sim": 1.0,
+    "generation_date": "2025-08-13"
+  },
+  "physical_constants": {
+    "h_SI_Js": 6.62607015e-34,
+    "hbar_SI_Js": 1.054571817e-34,
+    "c_m_per_s": 299792458.0,
+    "e_C": 1.602176634e-19,
+    "hc_eV_nm": 1239.8419843320026,
+    "notes": "Constants are CODATA / SI exact values used for conversions."
+  },
+  "levels": {
+    "S1/2": {
+      "energy_eV": 0.0,
+      "notes": "Reference ground electronic energy (2S1/2) set to 0 eV"
+    },
+    "S1/2_hyperfine": {
+      "F0": {
+        "label": "2S1/2 F=0",
+        "energy_eV": 0.0,
+        "frequency_Hz": 0.0
+      },
+      "F1": {
+        "label": "2S1/2 F=1",
+        "hyperfine_Hz": 12642812118.4689,
+        "energy_eV": 5.228646967662933e-05,
+        "notes": "Energy above F=0 = h * nu_HFS (Han et al. 2023 measurement).",
+        "sources": [
+          "Han et al., 'Precise determination of ground-state hyperfine splitting and calculation of Zeeman coefficients for 171Yb+ microwave frequency standard' (arXiv 2023 / published)."
+        ]
+      }
+    },
+    "P1/2": {
+      "label": "2P1/2 (excited)",
+      "wavelength_nm": 369.53,
+      "frequency_Hz": 8.11280431899981e14,
+      "energy_eV": 3.355186275355188,
+      "lifetime_s": 8.12e-09,
+      "lifetime_ns": 8.12,
+      "lifetime_ms": 8.12e-06,
+      "decay_rate_Hz": 1.2315270935960592e8,
+      "linewidth_FWHM_Hz": 1.960036244974081e7,
+      "branching": {
+        "to_D3/2": [
+          {
+            "value": 0.00501,
+            "uncertainty": 0.00015,
+            "source": "Olmschenk et al., experimental branching measurement (commonly used value)."
+          },
+          {
+            "value": 0.004907,
+            "uncertainty": 0.000019,
+            "source": "Recent precision determination (alternative reported value)."
+          }
+        ],
+        "to_S1/2": "1 - (to_D3/2)  (dominant decay channel for detection cycling)"
+      },
+      "hyperfine": {
+        "approx_Fsplitting_Hz": 2.105e9,
+        "notes": "Excited-state P1/2 hyperfine splitting often used in experiments (≈2.105 GHz); flagged approximate — see cited experimental descriptions and theses that use 2.105 GHz for EOM/AOM sidebands on 369 nm."
+      },
+      "sources": [
+        "Olmschenk et al., 'Manipulation and detection of a trapped hyperfine qubit' (Phys. Rev. A 76, 052314 (2007)) and later lifetime/branching works.",
+        "General experimental descriptions / NIST energy level references."
+      ]
+    },
+    "P3/2": {
+      "label": "2P3/2",
+      "notes": "Higher excited P state; hyperfine constants measured (Feldker et al. 2018). See sources.",
+      "hyperfine_A_MHz": 875.4,
+      "hyperfine_note": "A(2P3/2) = 875.4(10) MHz from Feldker et al., PRA 2018 (used if you include P3/2 in simulation).",
+      "sources": [
+        "Feldker et al., 'Spectroscopy of the 2S1/2 -> 2P3/2 transition in Yb II: isotope shifts, hyperfine splitting and branching ratios' (Phys. Rev. A 97, 032511 (2018) / arXiv:1711.04667)."
+      ]
+    },
+    "D3/2": {
+      "label": "2D3/2",
+      "wavelength_repump_nm": 935.187,
+      "frequency_Hz": 3.205695310135834e14,
+      "energy_eV": 1.325769054030908,
+      "lifetime_s": 0.0527,
+      "lifetime_ms": 52.7,
+      "decay_rate_Hz": 18.975332068311197,
+      "notes": "Metastable D3/2; repumped with 935.2 nm. Lifetime ≈ 52.7 ms from lifetime-measurement literature and reviews.",
+      "sources": [
+        "Lifetime and branching reviews / measurement compilations (see arXiv:2012.14187 review and earlier lifetime measurement literature)."
+      ]
+    },
+    "D5/2": {
+      "label": "2D5/2",
+      "lifetime_s": 0.0072,
+      "lifetime_ms": 7.2,
+      "decay_rate_Hz": 138.88888888888889,
+      "notes": "Metastable D5/2; lifetime ≈7.2 ms (commonly used experimental value).",
+      "sources": [
+        "Lifetime measurement literature and reviews (standard Yb+ experimental references)."
+      ]
+    },
+    "F7/2": {
+      "label": "2F7/2 (octupole clock state)",
+      "lifetime_s": 4.9800000e7,
+      "lifetime_days": 576.6666666666666,
+      "lifetime_years": 1.58,
+      "decay_rate_Hz": 2.0080321285140564e-08,
+      "notes": "Very long-lived; see Lange et al. PRL 2021 and related level studies.",
+      "sources": [
+        "Lange et al., PRL 127, 213001 (2021) and related reviews."
+      ]
+    }
+  },
+  "derived": {
+    "eV_to_Hz": 2.417989242e14,
+    "notes": "Used for convenience: 1 eV = (h * c / lambda) mapping; numeric eV->Hz factor included."
+  },
+  "sources": {
+    "NIST_ASD": "NIST Atomic Spectra Database / Yb II energy levels and wavelengths (canonical reference for level energies and wavelengths).",
+    "Han2023_nuHFS": "J. Z. Han et al., 'Precise determination of ground-state hyperfine splitting and calculation of Zeeman coefficients for 171Yb+ microwave frequency standard' (arXiv 2023 / published manuscript).",
+    "Olmschenk2007_2009": "C. Olmschenk et al., 'Manipulation and detection of a trapped hyperfine qubit' (PRA 76 052314 (2007)) and Olmschenk et al., PRA 80 022502 (2009) for lifetimes/branching discussion.",
+    "Feldker2018": "T. Feldker et al., 'Spectroscopy of the 2S1/2 -> 2P3/2 transition in Yb II: isotope shifts, hyperfine splitting and branching ratios' (PRA 97, 032511 (2018), arXiv:1711.04667).",
+    "D_level_review": "arXiv:2012.14187 (level & lifetime summary; D-level and branching results).",
+    "Lange2021_F7": "Lange et al., PRL 127, 213001 (2021) (F7/2 lifetime/clock-state measurements)."
+  }
+}
