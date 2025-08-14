@@ -1,23 +1,50 @@
-# Imports
-import json
-# import scipy
-# import jax as jx    # could be used for jit
-# import numba as nb  # use for jit, maybe parallelization
-import numpy as np  # use for computation
-from pathlib import Path
-from scipy.sparse import csr_matrix, csr_array, kron, identity  # faster operation and optimization
-from scipy.sparse.linalg import expm_multiply
-import matplotlib.pyplot as plt  # to showcase the frequency and amplitude - maybe just the pulse so one can see it
-from typing import Union, Tuple, List, Any, Callable, Literal, Sequence
+'''
+This file is the core of the project of the BlueSideYb. It contains the implementation of the IonQubit class,
+which represents the quantum state of the single qubit and its operations. 
+
+
+author: Bjarne Schümann
+last maintenance / update: 2023-14-08
+'''
+
+
+# --- Data and file handling ---
+import json;  ''' Import constants.json to initialize the system '''
+from pathlib import Path;  ''' Used for path management when finding the constants.json file '''
+
+# --- numerics and computation ---
+import numpy as np; ''' Used for numerical operations and array manipulations in addition to sparse matrices in scipy'''
+from scipy.sparse import csr_matrix, csr_array, kron, identity; ''' Sparse matrices and arrays for faster computation '''
+from scipy.sparse.linalg import expm_multiply, LinearOperator;  ''' Sparse linear algebra operations for efficient matrix exponential '''
+
+# --- type hinting for nicer code and easier usage ---
+from typing import Callable, Sequence, Tuple, List, Union, Any, Optional, Literal, Dict
+
+# --- Matplotlib for plotting of course ---
 import matplotlib as mpl
-mpl.rcParams['figure.autolayout'] = False
-mpl.rcParams['toolbar'] = 'none'  # optional, removes toolbar overhead
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+mpl.rcParams['figure.autolayout'] = False
+mpl.rcParams['toolbar'] = 'none'
 
-# TODO: make @ into np.einsum for faster computation. Think about using numba as well for jit compilation
-# TODO: implement solving of master equation
-# TODO: save the state at each time step in the solving process
+# --- additional tools ---
+import warnings;  ''' for reference so user knows about data heavy/ saving operations '''
+from tqdm.auto import tqdm; ''' Check for progress in simulation '''
+# --- numba for speed-up (njit for compilation and parallelization)
+from numba import types
+from numba.typed import List as NumbaList
+''' Provide a Fallback: If _NUMBA_OK is False, the program knows Numba is unavailable and can execute a standard, 
+    pure Python version of the same code. 
+'''
+try:
+    from numba import njit, prange
+    _NUMBA_OK = True
+except Exception:
+    _NUMBA_OK = False
+
+
+
+
 
 class System:
     def __init__(self, dimension: int, path: Union[None, str, Path] = None):
@@ -82,8 +109,8 @@ class System:
         L = -i(I⊗H - H^T⊗I) + sum_k (C_k ⊗ C_k^* - 0.5 I⊗(Ck†Ck)^T - 0.5 (Ck†Ck)⊗I)
         All inputs are CSR matrices. Output CSR (dim^2 x dim^2).
         """
-        dim = H.shape[0]
-        I = identity(dim, dtype=complex, format="csr")
+        dim = H.shape[0]  # type: ignore
+        I = identity(dim, dtype=complex, format="csr")  # type: ignore
         # coherent part
         L = -1j * (kron(I, H) - kron(H.T, I))
         # dissipators
@@ -91,7 +118,7 @@ class System:
             CdC = (C.getH() @ C).tocsr()
             L += kron(C, C.conjugate())
             L += -0.5 * kron(I, CdC.T) - 0.5 * kron(CdC, I)
-        return L.tocsr()
+        return L.tocsr()  # type: ignore
 
 class IonQubit(System):
     """
@@ -224,7 +251,7 @@ class IonQubit(System):
     def build_L(self, H: csr_matrix, collapses: Sequence[csr_matrix]) -> csr_matrix:
         return System.liouvillian(H, collapses)
 
-    def step(self, rho: csr_matrix, L: csr_matrix, dt: float) -> csr_matrix:
+    '''
         """
         One step via expm_multiply on the vectorized state:  vec(rho(t+dt)) = exp(L*dt) vec(rho(t))
         """
@@ -256,7 +283,7 @@ class IonQubit(System):
         for name, psi in states.items():
             projector = (psi @ psi.getH()).tocsr()
             expectations[name] = np.real((self.state @ projector).diagonal().sum())  # np.real(np.trace(self.state @ projector)) --> not working with csr matrices
-        return expectations
+        return expectations'''
 
     def expectation(self, O: csr_matrix) -> complex:
         return (self.state @ O).diagonal().sum()
@@ -292,10 +319,11 @@ class IonQubit(System):
 
     # To be implemented - maybe use qutip/qiskit/... for visualization
     # Might do my own version in matplotlib though
-
     def plot_vector_matplotlib(self, show_arrow=True, figsize=(8, 8), background="#222831", sphere_color="#393e46", 
                     point_color="#00adb5", arrow_color="#f8b400", label_color="#eeeeee", alpha=0.15):
         """
+        WARNING!: Does not work with UV - UV is headless, hence you will not see any plots. Please run your code
+        in a local environment with "python your_favorite_program.py"
         Advanced 3D Bloch sphere visualization with state, axes, and key points.
         """
         # Bloch sphere setup
@@ -390,8 +418,5 @@ class IonQubit(System):
 
         # plt.tight_layout()
         plt.show()
-
-    
-
 
 

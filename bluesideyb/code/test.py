@@ -13,9 +13,9 @@ def test_ket_bra_proj_xop():
         xop_i = sys.xop(i, (i+1)%4)
 
         # ket[i] @ bra[i] = proj[i]
-        assert np.allclose((ket_i @ bra_i).todense(), proj_i.todense())
+        assert np.allclose((ket_i @ bra_i).todense(), proj_i.todense())  # type: ignore
         # xop correctness
-        assert np.allclose((ket_i @ sys.bra((i+1)%4)).todense(), xop_i.todense())
+        assert np.allclose((ket_i @ sys.bra((i+1)%4)).todense(), xop_i.todense())  # type: ignore
 
 def test_vec_unvec():
     sys = System(dimension=3)
@@ -66,14 +66,14 @@ def test_step_evolution():
     H = iq.H_intrinsic()
     C_ops = []
     L = iq.build_L(H, C_ops)
-    rho_next = iq.step(iq.state, L, dt=0.01)
+    rho_next = iq.step(iq.state, L, dt=0.01)  # type: ignore
     assert rho_next.shape == (4,4)
     # trace should remain 1 for unitary evolution
     assert np.isclose(rho_next.diagonal().sum(), 1.0)
 
 def test_expectations_and_bloch():
     iq = IonQubit(initial_state='+')
-    exps = iq.qubit_expectations()
+    exps = iq.qubit_expectations()  # type: ignore
     for key in ['0','1','+','-','i','-i']:
         assert 0.0 <= exps[key] <= 1.0
 

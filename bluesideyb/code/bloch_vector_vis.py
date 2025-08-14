@@ -1,5 +1,3 @@
-
-
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from IonQubit import IonQubit
@@ -10,5 +8,3 @@ if __name__ == "__main__":
 
     # plot the qubit state
     qubit.plot_vector_matplotlib(show_arrow=True)
-
-    
