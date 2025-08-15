@@ -11,10 +11,7 @@ def test_ket_bra_proj_xop():
         bra_i = sys.bra(i)
         proj_i = sys.proj(i)
         xop_i = sys.xop(i, (i+1)%4)
-
-        # ket[i] @ bra[i] = proj[i]
         assert np.allclose((ket_i @ bra_i).todense(), proj_i.todense())  # type: ignore
-        # xop correctness
         assert np.allclose((ket_i @ sys.bra((i+1)%4)).todense(), xop_i.todense())  # type: ignore
 
 def test_vec_unvec():
@@ -30,24 +27,20 @@ def test_liouvillian():
     C = [csr_matrix([[0,1],[0,0]])]
     L = sys.liouvillian(H, C)
     assert L.shape == (4,4)
-    # Liouvillian should be complex
     assert np.iscomplexobj(L.todense())
 
 
 @pytest.mark.parametrize("state", [None, 0, 1, '0','1','+','-','i','-i'])
 def test_initialization(state):
-    # testing if proper quantum states are being created
     iq = IonQubit(initial_state=state)
     assert iq.state.shape == (4,4)
-    assert np.isclose(iq.state.diagonal().sum(), 1.0)  # density matrix trace=1
+    assert np.isclose(iq.state.diagonal().sum(), 1.0)
 
 def test_Hamiltonians():
     iq = IonQubit()
     H0 = iq.H_intrinsic()
     Hraman = iq.H_raman(Omega1=1.0, phi1=0.0, Omega2=0.5, phi2=np.pi/2)
     Hdet = iq.H_detect(Omega_det=0.8)
-    # All should be 4x4 sparse matrices
-    # Is not testing if it is actually what you want from it - that might come in later on though
     for H in [H0, Hraman, Hdet]:
         assert H.shape == (4,4)
 
@@ -68,7 +61,6 @@ def test_step_evolution():
     L = iq.build_L(H, C_ops)
     rho_next = iq.step(iq.state, L, dt=0.01)  # type: ignore
     assert rho_next.shape == (4,4)
-    # trace should remain 1 for unitary evolution
     assert np.isclose(rho_next.diagonal().sum(), 1.0)
 
 def test_expectations_and_bloch():
@@ -79,7 +71,7 @@ def test_expectations_and_bloch():
 
     bloch = iq.bloch_vector()
     assert bloch.shape == (3,)
-    assert np.all(np.abs(bloch) <= 1.0)  # Bloch vector norm <= 1
+    assert np.all(np.abs(bloch) <= 1.0)
 
 
 if __name__ == "__main__":

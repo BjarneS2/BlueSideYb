@@ -1,10 +1,9 @@
-# main.py
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
 from IonQubit import IonQubit
-from Simulator import Simulator, simulate
+from Simulator import simulate
 from utils.A import matrix_td_factory, gaussian_envelope, make_rect_window
 
 
@@ -23,20 +22,13 @@ def ket(i, dim=d):
     v = np.zeros((dim,1), dtype=np.complex128); v[i,0] = 1.0; return v
 def bra(i, dim=d): return ket(i,dim).conj().T
 def op(i,j, dim=d): return csr_matrix(ket(i,dim) @ bra(j,dim))
-# projectors
 P0 = op(i0,i0,d); P1 = op(i1,i1,d)
-# Pauli in the embedded space (zeros off the 2-dim subspace remain zero)
 sx = op(i0,i1,d) + op(i1,i0,d)
 sy = -1j*op(i0,i1,d) + 1j*op(i1,i0,d)
 sz = op(i0,i0,d) - op(i1,i1,d)
 I = csr_matrix(np.eye(d, dtype=np.complex128))
 
 c_hams = []
-
-
-# For a resonant two-level drive, H_X = (Ω/2) σ_x  → rotation angle θ = Ω * t
-# Hadamard ≈ R_y(π/2) up to phase, but R_x(π/2) also takes |0> -> |+> up to a global phase.
-# We'll do: X(π/2), then Z(π/4) [T gate], then Z(π)
 
 Ωx = 2*np.pi * 1e6      # 1 MHz Rabi
 θ_H = 0.5*np.pi         # π/2 rotation
@@ -67,23 +59,11 @@ t0_T = t0_H + tH
 t0_Z = t0_T + tT
 T_total = t0_Z + tZ
 
-# H_H_td = matrix_td_factory(HX, make_gauss_window(tH, amp=1.0), turn_on=t0_H)
-# H_T_td = matrix_td_factory(HZ_T, make_gauss_window(tT, amp=1.0), turn_on=t0_T)
-# H_Z_td = matrix_td_factory(HZ_Z, make_gauss_window(tZ, amp=1.0), turn_on=t0_Z)
 H_H_td = matrix_td_factory(HX, make_rect_window(tH, amp=1.0), turn_on=t0_H)  # type: ignore
 H_T_td = matrix_td_factory(HZ_T, make_rect_window(tT, amp=1.0), turn_on=t0_T)  # type: ignore
 H_Z_td = matrix_td_factory(HZ_Z, make_rect_window(tZ, amp=1.0), turn_on=t0_Z)  # type: ignore
-
 td_hams = [H_H_td, H_T_td, H_Z_td]
-
-# Here we skip P-level jumps (we’re in |0>,|1>)—uncomment below if you include an excited level.
 c_ops = []
-# Example if you had |P> in your model:
-# iP = q.iP
-# C_P0 = op(i0,iP,d)        # |0><P|
-# c_ops = [(C_P0, tau_P)]   # lifetime → sqrt(1/τ) scaling
-
-
 N = 4001
 tlist = np.linspace(0.0, T_total, N)
 # Save ~400 points
@@ -98,7 +78,6 @@ t_out, rhos = simulate(state=rho0,
                        mode="rk4_jit")
 
 # TODO: Add to utils
-# Bloch components: x=Tr(ρσx), y=Tr(ρσy), z=Tr(ρσz)
 def bloch(ρ):
     ρA = ρ.toarray()
     x = np.trace(ρA @ sx.toarray()).real
@@ -109,8 +88,8 @@ def bloch(ρ):
 b0 = bloch(rhos[0])
 bN = bloch(rhos[-1])
 
-print("Initial Bloch:", b0)
-print("Final   Bloch:", bN)
+print("Initial Blochvector:", b0)
+print("Final   Blochvector:", bN)
 
 # ---------- Plot start/end Bloch vectors ----------
 from mpl_toolkits.mplot3d import Axes3D
@@ -123,14 +102,14 @@ xs = np.outer(np.cos(u), np.sin(v))
 ys = np.outer(np.sin(u), np.sin(v))
 zs = np.outer(np.ones_like(u), np.cos(v))
 ax.plot_wireframe(xs, ys, zs, linewidth=0.3, alpha=0.4)
-# axes
+
 ax.quiver(0,0,0,1,0,0,length=1,color='k',linewidth=1)
 ax.quiver(0,0,0,0,1,0,length=1,color='k',linewidth=1)
 ax.quiver(0,0,0,0,0,1,length=1,color='k',linewidth=1)
-# points
+
 ax.scatter([b0[0]],[b0[1]],[b0[2]], s=40, label='start')  # type: ignore
 ax.scatter([bN[0]],[bN[1]],[bN[2]], s=40, label='end')  # type: ignore
-# pretty
+
 ax.set_xlim([-1,1]); ax.set_ylim([-1,1]); ax.set_zlim([-1,1])
 ax.set_box_aspect([1,1,1])
 ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
