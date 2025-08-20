@@ -42,8 +42,8 @@ Right now I am quite sure my code can solve a pde but can not create any physica
 - Noise models for laser amplitude, phase fluctuations, and spontaneous Raman scattering.  
 - Efficient numerical solvers leveraging sparse matrices, caching, and parallel parameter sweeps.  
 - Visualization tools for population dynamics, coherence, and gate fidelity metrics.
-
-**(Actual Features: Qubit instance and Gate initialization as well as a Simulator class with 2 (and a half) kind of solvers. The Hamiltonians in the Qubit class are still wrong but that is what I ended up with.)**
+  
+  **(Actual Features: Qubit instance and Gate initialization as well as a Simulator class with 2 (and a half) kind of solvers. The Hamiltonians in the Qubit class are still wrong but that is what I ended up with.)**
 ---
 
 ## Installation
