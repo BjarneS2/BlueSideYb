@@ -34,9 +34,9 @@ c_hams = []
 tH  = θ_H / Ωx          # duration for Hadamard-like X(π/2)
 HX  = 0.5*Ωx * sx       # (Ω/2) σ_x
 
-# Z-rotations via AC-Stark / detuning: H_Z = (Δ/2) σ_z, angle φ = Δ * t
-Δz_T = 2*np.pi * 1e6    # 1 MHz detuning
-φ_T  = 0.25*np.pi       # π/4
+# Z-rotations later should be done via AC-Stark / detuning: H_Z = (Δ/2) σ_z, angle φ = Δ * t
+Δz_T = 2*np.pi * 1e6
+φ_T  = 0.25*np.pi
 tT   = φ_T / Δz_T
 HZ_T = 0.5*Δz_T * sz
 
@@ -112,3 +112,46 @@ ax.legend()
 plt.tight_layout()
 plt.show()
 # plt.savefig("bloch_vectors.png", dpi=300)
+
+
+
+
+##########################################################################################################################
+# def plot_bloch_path(B, label="trajectory"):
+#     u = np.linspace(0, 2*np.pi, 60)
+#     v = np.linspace(0, np.pi, 30)
+#     xs = np.outer(np.cos(u), np.sin(v))
+#     ys = np.outer(np.sin(u), np.sin(v))
+#     zs = np.outer(np.ones_like(u), np.cos(v))
+
+#     fig = plt.figure(figsize=(6,6))
+#     ax = fig.add_subplot(111, projection='3d')
+#     ax.plot_wireframe(xs, ys, zs, linewidth=0.3, alpha=0.4)
+
+#     # Add labels instead of points
+#     ax.text(1.05, 0, 0, r'$|+\rangle$', color='red', fontsize=14)
+#     ax.text(0, 0, 1.05, r'$|0\rangle$', color='green', fontsize=14)
+#     ax.text(0, 1.05, 0, r'$|i\rangle$', color='blue', fontsize=14)
+
+#     # Draw axes
+#     ax.quiver(0,0,0,1,0,0,length=1)
+#     ax.quiver(0,0,0,0,1,0,length=1)
+#     ax.quiver(0,0,0,0,0,1,length=1)
+
+#     # Plot trajectory
+#     ax.plot(B[:,0], B[:,1], B[:,2], linestyle="--")
+#     ax.scatter([B[0,0]],[B[0,1]],[B[0,2]], s=30, label='start')
+#     ax.scatter([B[-1,0]],[B[-1,1]],[B[-1,2]], s=30, label='end')
+
+#     ax.set_xlim([-1,1]); ax.set_ylim([-1,1]); ax.set_zlim([-1,1])
+#     ax.set_box_aspect([1,1,1])
+#     ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
+
+#     # Rotate view so x,y point toward viewer
+#     ax.view_init(elev=20, azim=45)   # tweak azim to adjust
+
+#     ax.legend()
+#     plt.tight_layout()
+#     plt.show()
+
+# plot_bloch_path(B_id, label="ideal")
