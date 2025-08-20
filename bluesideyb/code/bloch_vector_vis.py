@@ -1,6 +1,6 @@
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    from IonQubit import IonQubit
+    from bluesideyb.IonQubit import YbQubit as IonQubit
     qubit = IonQubit(initial_state='+')  # you can also use 0
 
     # check Bloch vector

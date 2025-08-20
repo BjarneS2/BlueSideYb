@@ -2,10 +2,9 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
-from IonQubit import IonQubit
+from IonQubit import YbQubit as IonQubit
 from Simulator import simulate
-from utils.A import matrix_td_factory, gaussian_envelope, make_rect_window
-
+from Utils.Scripts import matrix_td_factory, make_rect_window
 
 with open("constants.json","r") as f:
     CONST = json.load(f)
@@ -48,34 +47,30 @@ HZ_Z = 0.5*Δz_Z * sz
 
 # Gaussian edges for realism; center each pulse in its own window
 sigma_frac = 0.15
-def make_gauss_window(duration, amp=1.0):
-    t0 = 0.5*duration
-    sigma = sigma_frac*duration
-    return lambda t: gaussian_envelope(t, t0, sigma, amp=amp)
 
 # Build TD hams as callables with turn_on offsets and non-overlapping schedules
 t0_H = 0.0
 t0_T = t0_H + tH
 t0_Z = t0_T + tT
-T_total = t0_Z + tZ
+T_total = t0_Z #+ tZ
 
 H_H_td = matrix_td_factory(HX, make_rect_window(tH, amp=1.0), turn_on=t0_H)  # type: ignore
 H_T_td = matrix_td_factory(HZ_T, make_rect_window(tT, amp=1.0), turn_on=t0_T)  # type: ignore
 H_Z_td = matrix_td_factory(HZ_Z, make_rect_window(tZ, amp=1.0), turn_on=t0_Z)  # type: ignore
-td_hams = [H_H_td, H_T_td, H_Z_td]
+td_hams = [H_H_td, H_T_td] # , H_Z_td]
 c_ops = []
 N = 4001
 tlist = np.linspace(0.0, T_total, N)
 # Save ~400 points
 n_save = 400
-t_out, rhos = simulate(state=rho0,
+t_out, rhos = simulate(state=rho0, # type: ignore
                        c_hamiltonians=c_hams,
                        td_hamiltonians=td_hams,
                        c_ops=c_ops,
                        tlist=tlist,
                        dt=tlist[1]-tlist[0],
                        n_savepoints=n_save,
-                       mode="rk4_jit")
+                       mode="rk4")  # rk4 is the fastest method
 
 # TODO: Add to utils
 def bloch(ρ):

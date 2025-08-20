@@ -1,5 +1,3 @@
-
-""" Useful functions to make it easier to set up the simulation """
 import numpy as np
 from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt

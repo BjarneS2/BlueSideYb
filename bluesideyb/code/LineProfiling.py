@@ -6,9 +6,9 @@ from typing import List, Optional
 from line_profiler import LineProfiler
 
 # Assuming these are defined in separate files and can be imported
-from IonQubit import IonQubit
-from Simulator import Simulator, _rk4_step  # <-- Import the _rk4_step function here
-from utils.A import matrix_td_factory, gaussian_envelope, make_rect_window, _drho_dt, _commutator
+from bluesideyb.IonQubit import YbQubit as IonQubit
+from bluesideyb.Simulator import simulate
+from Useful.Scripts import matrix_td_factory, gaussian_envelope, make_rect_window
 
 # --- Helper functions (assuming these are defined in your environment) ---
 def ket(i, dim):

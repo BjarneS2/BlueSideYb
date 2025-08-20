@@ -1,7 +1,6 @@
 {
   "meta": {
-    "notes": "All numeric values are precomputed. Runtime units: frequency=Hz, time=ms (lifetimes), energy=eV. Use hbar_sim=1 for simulation (internal convention).",
-    "hbar_sim": 1.0,
+    "notes": "I made this with GPT4.1 to find good references and find physical values from actual experiments. Some I have verified, others not. I tried to focus first on the necessary energy levels.",
     "generation_date": "2025-08-13"
   },
   "physical_constants": {
@@ -10,7 +9,7 @@
     "c_m_per_s": 299792458.0,
     "e_C": 1.602176634e-19,
     "hc_eV_nm": 1239.8419843320026,
-    "notes": "Constants are CODATA / SI exact values used for conversions."
+    "notes": "Constants are SI exact values used for conversions."
   },
   "levels": {
     "S1/2": {
@@ -21,13 +20,14 @@
       "F0": {
         "label": "2S1/2 F=0",
         "energy_eV": 0.0,
-        "frequency_Hz": 0.0
+        "frequency_Hz": 0.0,
+        "notes": "|0> state: Proper 0eV hyperfine electronic ground state"
       },
       "F1": {
         "label": "2S1/2 F=1",
         "hyperfine_Hz": 12642812118.4689,
         "energy_eV": 5.228646967662933e-05,
-        "notes": "Energy above F=0 = h * nu_HFS (Han et al. 2023 measurement).",
+        "notes": "|1> state: Energy above F=0 = h * nu_HFS (Han et al. 2023 measurement). The paper also refers to other hyperfine splitting energies.",
         "sources": [
           "Han et al., 'Precise determination of ground-state hyperfine splitting and calculation of Zeeman coefficients for 171Yb+ microwave frequency standard' (arXiv 2023 / published)."
         ]
@@ -44,36 +44,26 @@
       "decay_rate_Hz": 1.2315270935960592e8,
       "linewidth_FWHM_Hz": 1.960036244974081e7,
       "branching": {
-        "to_D3/2": [
-          {
+        "to_D3/2":{
             "value": 0.00501,
             "uncertainty": 0.00015,
             "source": "Olmschenk et al., experimental branching measurement."
           },
-          {
-            "value": 0.004907,
-            "uncertainty": 0.000019,
-            "source": "Recent precision determination (alternative reported value)."
-          }
-        ],
         "to_S1/2": "1 - (to_D3/2)  (dominant decay channel for detection cycling)"
       },
       "hyperfine": {
         "approx_Fsplitting_Hz": 2.105e9,
-        "notes": "Excited-state P1/2 hyperfine splitting often used in experiments (≈2.105 GHz); flagged approximate — see cited experimental descriptions and theses that use 2.105 GHz for EOM/AOM sidebands on 369 nm."
+        "notes": "Excited-state P1/2 hyperfine splitting often used in experiments (≈2.105 GHz); see cited experimental descriptions (Fig. 5)"
       },
       "sources": [
-        "Olmschenk et al., 'Manipulation and detection of a trapped hyperfine qubit' (Phys. Rev. A 76, 052314 (2007)) and later lifetime/branching works.",
-        "General experimental descriptions / NIST energy level references."
+        "Olmschenk et al., 'Manipulation and detection of a trapped hyperfine qubit' (Phys. Rev. A 76, 052314 (2007)) and later lifetime/branching works."
       ]
     },
     "P3/2": {
       "label": "2P3/2",
-      "notes": "Higher excited P state; hyperfine constants measured (Feldker et al. 2018). See sources.",
-      "hyperfine_A_MHz": 875.4,
-      "hyperfine_note": "A(2P3/2) = 875.4(10) MHz from Feldker et al., PRA 2018 (used if you include P3/2 in simulation).",
+      "notes": "Higher excited P state; hyperfine constants measured (Feldker et al. 2018) as well. See sources. Not used in simulation for simplicity sakes.",
       "sources": [
-        "Feldker et al., 'Spectroscopy of the 2S1/2 -> 2P3/2 transition in Yb II: isotope shifts, hyperfine splitting and branching ratios' (Phys. Rev. A 97, 032511 (2018) / arXiv:1711.04667)."
+        "See figrue one of: Feldker et al., 'Spectroscopy of the 2S1/2 -> 2P3/2 transition in Yb II: isotope shifts, hyperfine splitting and branching ratios' (Phys. Rev. A 97, 032511 (2018) / arXiv:1711.04667)."
       ]
     },
     "D3/2": {
@@ -86,7 +76,7 @@
       "decay_rate_Hz": 18.975332068311197,
       "notes": "Metastable D3/2; repumped with 935.2 nm. Lifetime ≈ 52.7 ms from lifetime-measurement literature and reviews.",
       "sources": [
-        "Lifetime and branching reviews / measurement compilations (see arXiv:2012.14187 review and earlier lifetime measurement literature)."
+        "NOT VERIFIED BY ME: Lifetime and branching reviews / measurement compilations (see arXiv:2012.14187 review and earlier lifetime measurement literature)."
       ]
     },
     "D5/2": {
@@ -96,7 +86,7 @@
       "decay_rate_Hz": 138.88888888888889,
       "notes": "Metastable D5/2; lifetime ≈7.2 ms (commonly used experimental value).",
       "sources": [
-        "Lifetime measurement literature and reviews (standard Yb+ experimental references)."
+        "NOT VERIFIED BY ME: Lifetime measurement literature and reviews (standard Yb+ experimental references)."
       ]
     },
     "F7/2": {
@@ -105,7 +95,7 @@
       "lifetime_days": 576.6666666666666,
       "lifetime_years": 1.58,
       "decay_rate_Hz": 2.0080321285140564e-08,
-      "notes": "Very long-lived; see Lange et al. PRL 2021 and related level studies.",
+      "notes": "NOT VERIFIED BY ME: Very long-lived; see Lange et al. PRL 2021 and related level studies.",
       "sources": [
         "Lange et al., PRL 127, 213001 (2021) and related reviews."
       ]
@@ -116,7 +106,7 @@
     "notes": "Used for convenience: 1 eV = (h * c / lambda) mapping; numeric eV->Hz factor included."
   },
   "sources": {
-    "NIST_ASD": "NIST Atomic Spectra Database / Yb II energy levels and wavelengths (canonical reference for level energies and wavelengths).",
+    "note": "See also docs in git repo.",
     "Han2023_nuHFS": "J. Z. Han et al., 'Precise determination of ground-state hyperfine splitting and calculation of Zeeman coefficients for 171Yb+ microwave frequency standard' (arXiv 2023 / published manuscript).",
     "Olmschenk2007_2009": "C. Olmschenk et al., 'Manipulation and detection of a trapped hyperfine qubit' (PRA 76 052314 (2007)) and Olmschenk et al., PRA 80 022502 (2009) for lifetimes/branching discussion.",
     "Feldker2018": "T. Feldker et al., 'Spectroscopy of the 2S1/2 -> 2P3/2 transition in Yb II: isotope shifts, hyperfine splitting and branching ratios' (PRA 97, 032511 (2018), arXiv:1711.04667).",
