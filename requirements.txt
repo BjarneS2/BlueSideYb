@@ -1,0 +1,13 @@
+h5py>=3.14.0
+ipython>=9.4.0
+ipywidgets>=8.1.7
+jax>=0.7.0
+jupyter>=1.1.1
+line-profiler>=5.0.0
+matplotlib>=3.10.5
+numba>=0.61.2
+numpy>=2.2.6
+pytest>=8.4.1
+qutip>=5.2.0
+scipy>=1.16.1
+tqdm>=4.67.1
