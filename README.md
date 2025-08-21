@@ -51,3 +51,5 @@ Right now I am quite sure my code can solve a pde but can not create any physica
 Requires Python 3.9+.
 ```bash
 pip install -r requirements.txt
+```
+Or simply run uv sync with the .toml file from the repo.
